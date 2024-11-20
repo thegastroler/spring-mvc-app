@@ -1,11 +1,15 @@
 package ru.bogoveevro.springapp.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.bogoveevro.springapp.models.Person;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +32,7 @@ public class PersonDAO {
     }
 
     public void save(Person person) {
-        jdbcTemplate.update("insert into person values (1, ?, ?, ?)",
+        jdbcTemplate.update("insert into person(name, age, email) values (?, ?, ?)",
                 person.getName(), person.getAge(), person.getEmail());
     }
 
@@ -39,5 +43,44 @@ public class PersonDAO {
 
     public void delete(int id) {
         jdbcTemplate.update("delete from person where id=?", id);
+    }
+
+    public void testMultipleUpdate() {
+        List<Person> personList = get1000Persons();
+        long start = System.currentTimeMillis();
+        for (Person person : personList) {
+            jdbcTemplate.update("insert into person (name, age, email) values (?, ?, ?)",
+                    person.getName(),person.getAge(), person.getEmail());
+        }
+        long finish = System.currentTimeMillis();
+        System.out.println((finish - start) + " millis");
+    }
+
+    public void testBatchUpdate() {
+        List<Person> personList = get1000Persons();
+        long start = System.currentTimeMillis();
+        jdbcTemplate.batchUpdate("insert into person (name, age, email) values (?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                preparedStatement.setString(1, personList.get(i).getName());
+                preparedStatement.setInt(2, personList.get(i).getAge());
+                preparedStatement.setString(3, personList.get(i).getEmail());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return personList.size();
+            }
+        });
+        long finish = System.currentTimeMillis();
+        System.out.println((finish - start) + " millis");
+    }
+
+    private List<Person> get1000Persons() {
+        List<Person> personList = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            personList.add(new Person(i, "Name " + i, i, i + "email@a.b"));
+        }
+        return personList;
     }
 }
