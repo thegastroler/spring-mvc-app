@@ -1,6 +1,5 @@
 package ru.bogoveevro.springapp.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +16,6 @@ import java.util.Optional;
 public class PersonDAO {
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public PersonDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -26,19 +24,25 @@ public class PersonDAO {
         return jdbcTemplate.query("select * from person", new BeanPropertyRowMapper<>(Person.class));
     }
 
+    public Optional<Person> getOne(String email) {
+        return jdbcTemplate.query("select * from person where email=?",
+                new BeanPropertyRowMapper<>(Person.class), email).stream().findAny();
+    }
+
     public Optional<Person> getOne(int id) {
-        return jdbcTemplate.query("select * from person where id = ?", new BeanPropertyRowMapper<>(Person.class), id).
-                stream().findAny();
+        return jdbcTemplate.query("select * from person where id=?",
+                new BeanPropertyRowMapper<>(Person.class), id).stream().findAny();
     }
 
     public void save(Person person) {
-        jdbcTemplate.update("insert into person(name, age, email) values (?, ?, ?)",
-                person.getName(), person.getAge(), person.getEmail());
+        jdbcTemplate.update("insert into person(name, age, email, address) values (?, ?, ?, ?)",
+                person.getName(), person.getAge(), person.getEmail(), person.getAddress());
     }
 
     public void update(Person updatedPerson, int id) {
-        jdbcTemplate.update("update person set name=?, age=?, email=? where id=?",
-                updatedPerson.getName(), updatedPerson.getAge(), updatedPerson.getEmail(), updatedPerson.getId());
+        jdbcTemplate.update("update person set name=?, age=?, email=?, address=? where id=?",
+                updatedPerson.getName(), updatedPerson.getAge(), updatedPerson.getEmail(),
+                updatedPerson.getAddress(), id);
     }
 
     public void delete(int id) {
@@ -50,7 +54,7 @@ public class PersonDAO {
         long start = System.currentTimeMillis();
         for (Person person : personList) {
             jdbcTemplate.update("insert into person (name, age, email) values (?, ?, ?)",
-                    person.getName(),person.getAge(), person.getEmail());
+                    person.getName(), person.getAge(), person.getEmail());
         }
         long finish = System.currentTimeMillis();
         System.out.println((finish - start) + " millis");
@@ -79,7 +83,7 @@ public class PersonDAO {
     private List<Person> get1000Persons() {
         List<Person> personList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            personList.add(new Person(i, "Name " + i, i, i + "email@a.b"));
+            personList.add(new Person(i, "Name " + i, i, i + "email@a.b", "a"));
         }
         return personList;
     }

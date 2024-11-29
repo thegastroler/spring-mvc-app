@@ -1,10 +1,7 @@
 package ru.bogoveevro.springapp.models;
 
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 public class Person {
     private int id;
@@ -20,6 +17,21 @@ public class Person {
     @Email(message = "Email should be valid")
     private String email;
 
+    @Pattern(regexp = "[A-Z]\\w+, [A-Z]\\w+, \\d{6}",
+            message = "Address should be in this format: \"Country, City, Postal Code (6 digits)\"")
+    private String address;
+
+    public Person() {
+    }
+
+    public Person(int id, String name, int age, String email, String address) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.address = address;
+    }
+
     public int getAge() {
         return age;
     }
@@ -34,16 +46,6 @@ public class Person {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Person(int id, String name, int age, String email) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.email = email;
-    }
-
-    public Person() {
     }
 
     public int getId() {
@@ -65,5 +67,13 @@ public class Person {
     @Override
     public String toString() {
         return String.format("%s, age: %d, email: %s", getName(), getAge(), getEmail());
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
