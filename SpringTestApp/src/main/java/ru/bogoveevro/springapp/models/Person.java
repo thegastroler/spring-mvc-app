@@ -1,22 +1,31 @@
 package ru.bogoveevro.springapp.models;
 
-
+import javax.persistence.*;
 import javax.validation.constraints.*;
 
+@Entity
+@Table(name = "person")
 public class Person {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "name")
     @NotEmpty(message = "Name should not be empty")
     @Size(min = 2, max = 30, message = "Name should be between 2 and 30 characters")
     private String name;
 
+    @Column(name = "age")
     @Min(value = 0, message = "Age should be greater than 0")
     private int age;
 
+    @Column(name = "email")
     @NotEmpty(message = "Email should not be empty")
     @Email(message = "Email should be valid")
     private String email;
 
+    @Column(name = "address")
     @Pattern(regexp = "[A-Z]\\w+, [A-Z]\\w+, \\d{6}",
             message = "Address should be in this format: \"Country, City, Postal Code (6 digits)\"")
     private String address;
