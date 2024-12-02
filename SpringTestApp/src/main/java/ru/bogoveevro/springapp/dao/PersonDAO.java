@@ -25,26 +25,38 @@ public class PersonDAO {
         return session.createQuery("from Person", Person.class).getResultList();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Person> getOne(String email) {
-        return null;
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("from Person where email = :email", Person.class).setParameter("email", email).
+                uniqueResultOptional();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Person> getOne(int id) {
-        return null;
+        Session session = sessionFactory.getCurrentSession();
+        return Optional.ofNullable(session.get(Person.class, id));
     }
 
+    @Transactional
     public void save(Person person) {
+        Session session = sessionFactory.getCurrentSession();
+        session.save(person);
     }
 
+    @Transactional
     public void update(Person updatedPerson, int id) {
+        Session session = sessionFactory.getCurrentSession();
+        Person person = session.get(Person.class, id);
+        person.setName(updatedPerson.getName());
+        person.setAge(updatedPerson.getAge());
+        person.setEmail(updatedPerson.getEmail());
+        person.setAddress(updatedPerson.getAddress());
     }
 
+    @Transactional
     public void delete(int id) {
-    }
-
-    public void testMultipleUpdate() {
-    }
-
-    public void testBatchUpdate() {
+        Session session = sessionFactory.getCurrentSession();
+        session.remove(session.get(Person.class, id));
     }
 }

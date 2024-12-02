@@ -6,6 +6,8 @@ import org.springframework.validation.Validator;
 import ru.bogoveevro.springapp.dao.PersonDAO;
 import ru.bogoveevro.springapp.models.Person;
 
+import java.util.Optional;
+
 @Component
 public class PersonValidator implements Validator {
     private final PersonDAO personDAO;
@@ -22,8 +24,13 @@ public class PersonValidator implements Validator {
     @Override
     public void validate(Object o, Errors errors) {
         Person person = (Person) o;
-        if (personDAO.getOne(person.getEmail()).isPresent()) {
-            errors.rejectValue("email", "", "This email is already taken");
+        Optional<Person> optionalPerson = personDAO.getOne(person.getEmail());
+
+        if (optionalPerson.isPresent()) {
+            Person findPerson = optionalPerson.get();
+            if (findPerson.getId() != person.getId()) {
+                errors.rejectValue("email", "", "This email is already taken");
+            }
         }
     }
 }
