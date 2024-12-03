@@ -1,23 +1,25 @@
 package ru.bogoveevro.springapp.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.bogoveevro.springapp.dao.PersonDAO;
 import ru.bogoveevro.springapp.models.Person;
+import ru.bogoveevro.springapp.services.PeopleService;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    private final PersonDAO personDAO;
+    private final PeopleService peopleService;
 
-    public AdminController(PersonDAO personDAO) {
-        this.personDAO = personDAO;
+    @Autowired
+    public AdminController(PeopleService peopleService) {
+        this.peopleService = peopleService;
     }
 
     @GetMapping()
     public String index(Model model, @ModelAttribute("person") Person person) {
-        model.addAttribute("people", personDAO.getAll());
+        model.addAttribute("people", peopleService.findAll());
         return "admin/index";
     }
 
